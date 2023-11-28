@@ -1,0 +1,14 @@
+{% assign operationTypes = Operations | map: "Consumes" | uniq -%}
+{% for operationType in operationTypes -%}
+{%     if operationType == "application/json" -%}
+private static readonly global::System.Net.Http.Headers.MediaTypeHeaderValue applicationJsonMediaTypeConsumed = new global::System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
+{%     endif -%}
+{% endfor -%}
+{% assign operationTypes = Operations | map: "Produces" | uniq -%}
+{% for operationType in operationTypes -%}
+{%     if operationType == "application/json" -%}
+private static readonly global::System.Net.Http.Headers.MediaTypeWithQualityHeaderValue applicationJsonMediaTypeProduced = new global::System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json");
+{%     elsif operationType == "application/octet-stream-stream" -%}
+private static readonly global::System.Net.Http.Headers.MediaTypeWithQualityHeaderValue applicationOctetStreamMediaTypeProduced = new global::System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/octet-stream");
+{%     endif -%}
+{% endfor -%}

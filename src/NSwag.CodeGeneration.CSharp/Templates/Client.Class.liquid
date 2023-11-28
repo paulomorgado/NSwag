@@ -176,23 +176,23 @@
                 content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse({{ operation.ContentParameter.VariableName }}.ContentType);
 {%             else -%}
                 var content_ = new System.Net.Http.StreamContent({{ operation.ContentParameter.VariableName }});
-                content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("{{ operation.Consumes }}");
+                content_.Headers.ContentType = {% template Client.Class.Operation.Consumes.MediaType -%};
 {%             endif -%}
 {%         elsif operation.HasXmlBodyParameter -%}
                 var content_ = new System.Net.Http.StringContent({{ operation.ContentParameter.VariableName }});
-                content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("{{ operation.Consumes }}");
+                content_.Headers.ContentType = {% template Client.Class.Operation.Consumes.MediaType -%};
 {%         elsif operation.ConsumesFormUrlEncoded -%}
                 var json_ = {% if UseSystemTextJson %}System.Text.Json.JsonSerializer.SerializeToUtf8Bytes{% else %}Newtonsoft.Json.JsonConvert.SerializeObject{% endif %}({{ operation.ContentParameter.VariableName }}, _settings.Value);
                 var dictionary_ = {% if UseSystemTextJson %}System.Text.Json.JsonSerializer.Deserialize{% else %}Newtonsoft.Json.JsonConvert.DeserializeObject{% endif %}<System.Collections.Generic.Dictionary<string, string>>(json_, _settings.Value);
                 var content_ = new System.Net.Http.FormUrlEncodedContent(dictionary_);
-                content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("{{ operation.Consumes }}");
+                content_.Headers.ContentType = {% template Client.Class.Operation.Consumes.MediaType -%};
 {%         elsif operation.HasPlainTextBodyParameter -%}
                 var content_ = new System.Net.Http.StringContent({{ operation.ContentParameter.VariableName }});
-                content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("{{ operation.Consumes }}");
+                content_.Headers.ContentType = {% template Client.Class.Operation.Consumes.MediaType -%};
 {%         else -%}
                 var json_ = {% if UseSystemTextJson %}System.Text.Json.JsonSerializer.SerializeToUtf8Bytes{% else %}Newtonsoft.Json.JsonConvert.SerializeObject{% endif %}({{ operation.ContentParameter.VariableName }}, {% if SerializeTypeInformation %}typeof({{ operation.ContentParameter.Type }}), {% endif %}{% if UseRequestAndResponseSerializationSettings %}_requestSettings{% else %}_settings{% endif %}.Value);
                 var content_ = new System.Net.Http.{% if UseSystemTextJson %}ByteArrayContent{% else %}StringContent{% endif %}(json_);
-                content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("{{ operation.Consumes }}");
+                content_.Headers.ContentType = {% template Client.Class.Operation.Consumes.MediaType -%};
 {%         endif -%}
                 request_.Content = content_;
 {%     else -%}
@@ -255,12 +255,16 @@
                 request_.Content = content_;
 {%             endif -%}
 {%         elsif operation.IsGetOrDeleteOrHead == false -%}
+#if NET7_0_OR_GREATER
+                request_.Content = new System.Net.Http.StringContent(string.Empty, System.Text.Encoding.UTF8, {% template Client.Class.Operation.Produces.MediaType -%});
+#else
                 request_.Content = new System.Net.Http.StringContent(string.Empty, System.Text.Encoding.UTF8, "{{ operation.Produces }}");
+#endif
 {%         endif -%}
 {%     endif -%}
                 request_.Method = new System.Net.Http.HttpMethod("{{ operation.HttpMethodUpper | upcase }}");
 {%     if operation.HasResultType and operation.HasAcceptHeaderParameterParameter == false -%}
-                request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("{{ operation.Produces }}"));
+                request_.Headers.Accept.Add({% template Client.Class.Operation.Produces.MediaType -%});
 {%     endif -%}
 
                 var urlBuilder_ = new System.Text.StringBuilder();
@@ -447,5 +451,6 @@
     {% template Client.Class.ReadObjectResponse %}
 
     {% template Client.Class.ConvertToString %}
+    {% template Client.Class.Operation.MediaTypes %}
     {% template Client.Class.Body %}
 }

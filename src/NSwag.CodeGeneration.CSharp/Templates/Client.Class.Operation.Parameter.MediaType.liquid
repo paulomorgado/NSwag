@@ -1,0 +1,3 @@
+{% if operation.ContentParameter.VariableName.ContentType == "application/json" %}applicationJsonMediaTypeConsumed{%
+    else %}global::System.Net.Http.Headers.MediaTypeHeaderValue.Parse("{{ operation.ContentParameter.VariableName }}.ContentType"){%
+    endif -%}

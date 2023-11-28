@@ -1,0 +1,4 @@
+{% if operation.Produces == "application/json" %}applicationJsonMediaTypeProduced{%
+    elsif operation.Produces == "application/octet-stream" %}applicationOctetStreamMediaTypeProduced{%
+    else %}global::System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("{{ operation.Produces }}"){%
+    endif -%}
